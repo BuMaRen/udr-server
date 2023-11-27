@@ -1,8 +1,13 @@
-# 推送镜像到DockerHub和Github Package
 name: Publish Docker image
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    # Publish semver tags as releases.
+    tags: 
+      - 'v*.*.*'
   pull_request:
     branches:
       - main
@@ -35,14 +40,6 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          # -------- default: -------
-          # tags: |
-          #   type=schedule,pattern=nightly,enable=true,priority=1000
-          #   type=ref,event=branch,enable=true,priority=600
-          #   type=ref,event=tag,enable=true,priority=600
-          #   type=ref,event=pr,prefix=pr-,enable=true,priority=600
-          tags: |
-            type=edge,enable=true,priority=700,prefix=,suffix=,branch=main
           images: |
             hjmasha/udr-server
             ghcr.io/${{ github.repository }}
