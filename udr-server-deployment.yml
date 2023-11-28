@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: udr-server
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: udr-server
+  template:
+    metadata:
+      labels:
+        app: udr-server
+    spec:
+      affinity:
+        # 反亲和
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            # 对于满足labelSelector的pod，检查他们所在节点的topologyKey
+            # topologyKey的value相同则认为是同一个位置(亲和)
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values: 
+                    - udr-server 
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: udr-server
+        securityContext:
+          runAsUser: 0
+        image: hjmasha/udr-server:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        env:
+        - name: TCP_PORT
+          value: 10500,10600,10700
+        volumeMounts:
+        - name: udr-server-home
+          mountPath: /home/ftpuser/
+      volumes:
+      - hostPath:
+          path: /tmp/udr-server/home
+          type: DirectoryOrCreate
+        name: udr-server-home
+
+
